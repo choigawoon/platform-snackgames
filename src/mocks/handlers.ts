@@ -12,15 +12,26 @@ import {
   LoginResponseSchema,
   HealthCheckSchema,
   SearchResponseSchema,
+  GameResponseSchema,
+  GamesListResponseSchema,
+  CategoriesResponseSchema,
+  CommentCreateSchema,
+  CommentResponseSchema,
+  CommentsListResponseSchema,
+  RatingCreateSchema,
+  RatingResponseSchema,
+  RatingSummaryResponseSchema,
   type Item,
   type User,
   type HealthCheck,
   type HTTPValidationError,
+  type GameResponse,
+  type CommentResponse,
 } from '@/schemas'
 import { db } from '@/db'
 
 // Re-export types for convenience
-export type { Item, User } from '@/schemas'
+export type { Item, User, GameResponse, CommentResponse } from '@/schemas'
 
 // ============================================================================
 // Helper Functions
@@ -383,5 +394,364 @@ export const handlers = [
     // Validate response with Zod
     const validated = SearchResponseSchema.parse(response)
     return HttpResponse.json(validated)
+  }),
+
+  // ============================================================================
+  // Games API Handlers
+  // ============================================================================
+
+  // Games - List all games
+  http.get('/api/games', async ({ request }) => {
+    const url = new URL(request.url)
+    const skip = parseInt(url.searchParams.get('skip') || '0')
+    const limit = parseInt(url.searchParams.get('limit') || '20')
+    const category = url.searchParams.get('category')
+    const search = url.searchParams.get('search')
+    const sortBy = url.searchParams.get('sort_by') || 'popular'
+
+    let games = await db.games.toArray()
+
+    // Filter by category
+    if (category) {
+      games = games.filter((game) => game.category === category)
+    }
+
+    // Filter by search
+    if (search) {
+      const searchLower = search.toLowerCase()
+      games = games.filter(
+        (game) =>
+          game.title.toLowerCase().includes(searchLower) ||
+          game.description.toLowerCase().includes(searchLower) ||
+          game.tags.some((tag) => tag.toLowerCase().includes(searchLower))
+      )
+    }
+
+    // Sort games
+    switch (sortBy) {
+      case 'popular':
+        games.sort((a, b) => b.play_count - a.play_count)
+        break
+      case 'latest':
+        games.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        break
+      case 'rating':
+        games.sort((a, b) => b.avg_rating - a.avg_rating)
+        break
+    }
+
+    const total = games.length
+    const paginatedGames = games.slice(skip, skip + limit)
+
+    // Map to response format
+    const responseGames: GameResponse[] = paginatedGames.map((game) => ({
+      id: game.id!,
+      title: game.title,
+      description: game.description,
+      url: game.url,
+      thumbnail: game.thumbnail,
+      category: game.category as GameResponse['category'],
+      tags: game.tags,
+      embed_allowed: game.embed_allowed,
+      play_count: game.play_count,
+      avg_rating: game.avg_rating,
+      rating_count: game.rating_count,
+      created_at: game.created_at,
+      updated_at: game.updated_at,
+    }))
+
+    const response = {
+      games: responseGames,
+      total,
+      skip,
+      limit,
+    }
+
+    const validated = GamesListResponseSchema.parse(response)
+    return HttpResponse.json(validated)
+  }),
+
+  // Games - Get single game
+  http.get('/api/games/:id', async ({ params }) => {
+    const { id } = params
+    const game = await db.games.get(Number(id))
+
+    if (!game) {
+      return httpErrorResponse('Game not found', 404)
+    }
+
+    const responseGame: GameResponse = {
+      id: game.id!,
+      title: game.title,
+      description: game.description,
+      url: game.url,
+      thumbnail: game.thumbnail,
+      category: game.category as GameResponse['category'],
+      tags: game.tags,
+      embed_allowed: game.embed_allowed,
+      play_count: game.play_count,
+      avg_rating: game.avg_rating,
+      rating_count: game.rating_count,
+      created_at: game.created_at,
+      updated_at: game.updated_at,
+    }
+
+    const validated = GameResponseSchema.parse(responseGame)
+    return HttpResponse.json(validated)
+  }),
+
+  // Games - Get categories
+  http.get('/api/games/categories', async () => {
+    const games = await db.games.toArray()
+
+    // Count games per category
+    const categoryCounts = games.reduce((acc, game) => {
+      acc[game.category] = (acc[game.category] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    const categoryNames: Record<string, string> = {
+      puzzle: '퍼즐',
+      action: '액션',
+      education: '교육',
+      entertainment: '엔터테인먼트',
+      casual: '캐주얼',
+      sports: '스포츠',
+      strategy: '전략',
+    }
+
+    const categories = Object.entries(categoryCounts).map(([id, count]) => ({
+      id: id as GameResponse['category'],
+      name: categoryNames[id] || id,
+      count,
+    }))
+
+    const response = { categories }
+    const validated = CategoriesResponseSchema.parse(response)
+    return HttpResponse.json(validated)
+  }),
+
+  // Games - Record play
+  http.post('/api/games/:id/play', async ({ params, request }) => {
+    const { id } = params
+    const gameId = Number(id)
+    const game = await db.games.get(gameId)
+
+    if (!game) {
+      return httpErrorResponse('Game not found', 404)
+    }
+
+    const body = await request.json() as { visitor_id: string; duration?: number }
+    const now = new Date().toISOString()
+
+    // Record play history
+    await db.playHistory.add({
+      game_id: gameId,
+      visitor_id: body.visitor_id,
+      duration: body.duration || null,
+      played_at: now,
+    })
+
+    // Increment play count
+    await db.games.update(gameId, {
+      play_count: game.play_count + 1,
+    })
+
+    return HttpResponse.json({ message: 'Play recorded successfully' })
+  }),
+
+  // ============================================================================
+  // Comments API Handlers
+  // ============================================================================
+
+  // Comments - List comments for a game
+  http.get('/api/games/:gameId/comments', async ({ params, request }) => {
+    const { gameId } = params
+    const url = new URL(request.url)
+    const skip = parseInt(url.searchParams.get('skip') || '0')
+    const limit = parseInt(url.searchParams.get('limit') || '20')
+
+    const comments = await db.comments
+      .where('game_id')
+      .equals(Number(gameId))
+      .reverse()
+      .toArray()
+
+    const total = comments.length
+    const paginatedComments = comments.slice(skip, skip + limit)
+
+    const responseComments: CommentResponse[] = paginatedComments.map((comment) => ({
+      id: comment.id!,
+      game_id: comment.game_id,
+      nickname: comment.nickname,
+      content: comment.content,
+      created_at: comment.created_at,
+      updated_at: comment.updated_at,
+    }))
+
+    const response = {
+      comments: responseComments,
+      total,
+      skip,
+      limit,
+    }
+
+    const validated = CommentsListResponseSchema.parse(response)
+    return HttpResponse.json(validated)
+  }),
+
+  // Comments - Create comment
+  http.post('/api/games/:gameId/comments', async ({ params, request }) => {
+    const { gameId } = params
+    const body = await request.json()
+
+    const result = CommentCreateSchema.safeParse(body)
+    if (!result.success) {
+      return validationErrorResponse(result.error)
+    }
+
+    const game = await db.games.get(Number(gameId))
+    if (!game) {
+      return httpErrorResponse('Game not found', 404)
+    }
+
+    const validatedData = result.data
+    const now = new Date().toISOString()
+
+    const id = await db.comments.add({
+      game_id: Number(gameId),
+      nickname: validatedData.nickname,
+      content: validatedData.content,
+      created_at: now,
+      updated_at: now,
+    }) as number
+
+    const newComment: CommentResponse = {
+      id,
+      game_id: Number(gameId),
+      nickname: validatedData.nickname,
+      content: validatedData.content,
+      created_at: now,
+      updated_at: now,
+    }
+
+    const validated = CommentResponseSchema.parse(newComment)
+    return HttpResponse.json(validated, { status: 201 })
+  }),
+
+  // Comments - Delete comment
+  http.delete('/api/comments/:id', async ({ params }) => {
+    const { id } = params
+    const commentId = Number(id)
+    const existingComment = await db.comments.get(commentId)
+
+    if (!existingComment) {
+      return httpErrorResponse('Comment not found', 404)
+    }
+
+    await db.comments.delete(commentId)
+    return HttpResponse.json({ message: 'Comment deleted successfully' })
+  }),
+
+  // ============================================================================
+  // Ratings API Handlers
+  // ============================================================================
+
+  // Ratings - Get rating summary for a game
+  http.get('/api/games/:gameId/rating', async ({ params, request }) => {
+    const { gameId } = params
+    const url = new URL(request.url)
+    const visitorId = url.searchParams.get('visitor_id')
+
+    const game = await db.games.get(Number(gameId))
+    if (!game) {
+      return httpErrorResponse('Game not found', 404)
+    }
+
+    let userRating = null
+    if (visitorId) {
+      const rating = await db.ratings
+        .where('[game_id+visitor_id]')
+        .equals([Number(gameId), visitorId])
+        .first()
+      userRating = rating?.score || null
+    }
+
+    const response = {
+      game_id: game.id!,
+      avg_rating: game.avg_rating,
+      rating_count: game.rating_count,
+      user_rating: userRating,
+    }
+
+    const validated = RatingSummaryResponseSchema.parse(response)
+    return HttpResponse.json(validated)
+  }),
+
+  // Ratings - Create or update rating
+  http.post('/api/games/:gameId/rating', async ({ params, request }) => {
+    const { gameId } = params
+    const body = await request.json()
+
+    const result = RatingCreateSchema.safeParse(body)
+    if (!result.success) {
+      return validationErrorResponse(result.error)
+    }
+
+    const game = await db.games.get(Number(gameId))
+    if (!game) {
+      return httpErrorResponse('Game not found', 404)
+    }
+
+    const validatedData = result.data
+    const now = new Date().toISOString()
+
+    // Check if user already rated
+    const existingRating = await db.ratings
+      .where('[game_id+visitor_id]')
+      .equals([Number(gameId), validatedData.visitor_id])
+      .first()
+
+    let ratingId: number
+    if (existingRating) {
+      // Update existing rating
+      await db.ratings.update(existingRating.id!, {
+        score: validatedData.score,
+        created_at: now,
+      })
+      ratingId = existingRating.id!
+    } else {
+      // Create new rating
+      ratingId = await db.ratings.add({
+        game_id: Number(gameId),
+        visitor_id: validatedData.visitor_id,
+        score: validatedData.score,
+        created_at: now,
+      }) as number
+    }
+
+    // Recalculate average rating
+    const allRatings = await db.ratings
+      .where('game_id')
+      .equals(Number(gameId))
+      .toArray()
+
+    const avgRating = allRatings.reduce((sum, r) => sum + r.score, 0) / allRatings.length
+
+    await db.games.update(Number(gameId), {
+      avg_rating: Math.round(avgRating * 10) / 10,
+      rating_count: allRatings.length,
+    })
+
+    const response = {
+      id: ratingId,
+      game_id: Number(gameId),
+      visitor_id: validatedData.visitor_id,
+      score: validatedData.score,
+      created_at: now,
+    }
+
+    const validated = RatingResponseSchema.parse(response)
+    return HttpResponse.json(validated, { status: existingRating ? 200 : 201 })
   }),
 ]

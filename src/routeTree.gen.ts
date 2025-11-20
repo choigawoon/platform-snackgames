@@ -10,12 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZustandTestRouteImport } from './routes/zustand-test'
+import { Route as SwipeRouteImport } from './routes/swipe'
 import { Route as MswTestRouteImport } from './routes/msw-test'
+import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GamesGameIdRouteImport } from './routes/games/$gameId'
 
 const ZustandTestRoute = ZustandTestRouteImport.update({
   id: '/zustand-test',
   path: '/zustand-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SwipeRoute = SwipeRouteImport.update({
+  id: '/swipe',
+  path: '/swipe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MswTestRoute = MswTestRouteImport.update({
@@ -23,40 +31,81 @@ const MswTestRoute = MswTestRouteImport.update({
   path: '/msw-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesGameIdRoute = GamesGameIdRouteImport.update({
+  id: '/games/$gameId',
+  path: '/games/$gameId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/explore': typeof ExploreRoute
   '/msw-test': typeof MswTestRoute
+  '/swipe': typeof SwipeRoute
   '/zustand-test': typeof ZustandTestRoute
+  '/games/$gameId': typeof GamesGameIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/explore': typeof ExploreRoute
   '/msw-test': typeof MswTestRoute
+  '/swipe': typeof SwipeRoute
   '/zustand-test': typeof ZustandTestRoute
+  '/games/$gameId': typeof GamesGameIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/explore': typeof ExploreRoute
   '/msw-test': typeof MswTestRoute
+  '/swipe': typeof SwipeRoute
   '/zustand-test': typeof ZustandTestRoute
+  '/games/$gameId': typeof GamesGameIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/msw-test' | '/zustand-test'
+  fullPaths:
+    | '/'
+    | '/explore'
+    | '/msw-test'
+    | '/swipe'
+    | '/zustand-test'
+    | '/games/$gameId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/msw-test' | '/zustand-test'
-  id: '__root__' | '/' | '/msw-test' | '/zustand-test'
+  to:
+    | '/'
+    | '/explore'
+    | '/msw-test'
+    | '/swipe'
+    | '/zustand-test'
+    | '/games/$gameId'
+  id:
+    | '__root__'
+    | '/'
+    | '/explore'
+    | '/msw-test'
+    | '/swipe'
+    | '/zustand-test'
+    | '/games/$gameId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ExploreRoute: typeof ExploreRoute
   MswTestRoute: typeof MswTestRoute
+  SwipeRoute: typeof SwipeRoute
   ZustandTestRoute: typeof ZustandTestRoute
+  GamesGameIdRoute: typeof GamesGameIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +117,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZustandTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/swipe': {
+      id: '/swipe'
+      path: '/swipe'
+      fullPath: '/swipe'
+      preLoaderRoute: typeof SwipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/msw-test': {
       id: '/msw-test'
       path: '/msw-test'
       fullPath: '/msw-test'
       preLoaderRoute: typeof MswTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -82,13 +145,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/$gameId': {
+      id: '/games/$gameId'
+      path: '/games/$gameId'
+      fullPath: '/games/$gameId'
+      preLoaderRoute: typeof GamesGameIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ExploreRoute: ExploreRoute,
   MswTestRoute: MswTestRoute,
+  SwipeRoute: SwipeRoute,
   ZustandTestRoute: ZustandTestRoute,
+  GamesGameIdRoute: GamesGameIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
