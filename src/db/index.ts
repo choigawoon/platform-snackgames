@@ -153,6 +153,20 @@ const initialUsers: Omit<UserEntity, 'id'>[] = [
 
 const initialGames: Omit<GameEntity, 'id'>[] = [
   {
+    title: '메모리 게임',
+    description: '카드를 뒤집어 같은 그림 2개를 찾는 기억력 게임입니다. 가능한 적은 횟수로 모든 카드를 맞춰보세요!',
+    url: 'internal://memory-game',
+    thumbnail: null,
+    category: 'puzzle',
+    tags: ['퍼즐', '기억력', '카드', '두뇌'],
+    embed_allowed: true,
+    play_count: 0,
+    avg_rating: 0,
+    rating_count: 0,
+    created_at: '2024-01-20T00:00:00Z',
+    updated_at: '2024-01-20T00:00:00Z',
+  },
+  {
     title: '수박게임',
     description: '과일을 합쳐서 큰 수박을 만드는 중독성 있는 퍼즐 게임입니다. 같은 과일끼리 합치면 더 큰 과일이 되고, 최종 목표는 수박을 만드는 것입니다.',
     url: 'https://suika-game.app/ko',

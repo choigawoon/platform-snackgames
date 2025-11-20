@@ -1,12 +1,14 @@
 /**
  * GamePlayer Component
  * iframe wrapper for embedded games with fullscreen support
+ * Also supports internal games with internal:// URL scheme
  */
 
 import { useState } from 'react'
 import { Maximize2, Minimize2, ExternalLink, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { MemoryGame } from './MemoryGame'
 
 interface GamePlayerProps {
   url: string
@@ -15,10 +17,47 @@ interface GamePlayerProps {
   onPlay?: () => void
 }
 
+// Internal game registry
+const INTERNAL_GAMES: Record<string, React.ComponentType<{ onPlay?: () => void }>> = {
+  'memory-game': MemoryGame,
+}
+
 export function GamePlayer({ url, title, embedAllowed, onPlay }: GamePlayerProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [hasError, setHasError] = useState(false)
+
+  // Check if this is an internal game
+  const isInternalGame = url.startsWith('internal://')
+  const internalGameId = isInternalGame ? url.replace('internal://', '') : null
+  const InternalGameComponent = internalGameId ? INTERNAL_GAMES[internalGameId] : null
+
+  // Render internal game if available
+  if (isInternalGame && InternalGameComponent) {
+    return (
+      <div
+        id="game-player-container"
+        className="relative w-full bg-background rounded-lg overflow-hidden border"
+      >
+        <div className="p-4">
+          <InternalGameComponent onPlay={onPlay} />
+        </div>
+      </div>
+    )
+  }
+
+  // If internal game not found, show error
+  if (isInternalGame && !InternalGameComponent) {
+    return (
+      <div className="w-full aspect-video bg-muted rounded-lg flex flex-col items-center justify-center gap-4 p-6">
+        <Alert className="max-w-md">
+          <AlertDescription>
+            이 게임을 찾을 수 없습니다.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
 
   const handleLoad = () => {
     setIsLoading(false)

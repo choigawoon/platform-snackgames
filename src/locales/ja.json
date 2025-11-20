@@ -236,6 +236,18 @@
     "minLength": "{{min}}文字以上で入力してください",
     "maxLength": "{{max}}文字以内で入力してください"
   },
+  "games": {
+    "memory": {
+      "moves": "{{count}}回",
+      "restart": "リスタート",
+      "bestScore": "ベスト: {{moves}}回",
+      "congratulations": "おめでとうございます!",
+      "completedIn": "{{moves}}回で{{time}}に完了しました!",
+      "newRecord": "新記録!",
+      "playAgain": "もう一度プレイ",
+      "instructions": "カードをクリックして同じ絵柄のペアを見つけよう!"
+    }
+  },
   "theme": {
     "light": "ライト",
     "dark": "ダーク",
