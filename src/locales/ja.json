@@ -246,6 +246,24 @@
       "newRecord": "新記録!",
       "playAgain": "もう一度プレイ",
       "instructions": "カードをクリックして同じ絵柄のペアを見つけよう!"
+    },
+    "timing": {
+      "score": "スコア: {{score}}",
+      "combo": "コンボ: {{combo}}x",
+      "restart": "リスタート",
+      "bestScore": "ベスト: {{score}}点",
+      "pressToStart": "押してスタート!",
+      "hit": "押せ!",
+      "gameOver": "ゲームオーバー",
+      "finalScore": "最終スコア: {{score}}",
+      "maxCombo": "最大コンボ: {{combo}}x",
+      "newRecord": "新記録!",
+      "playAgain": "もう一度プレイ",
+      "perfect": "Perfect!",
+      "good": "Good!",
+      "miss": "Miss!",
+      "instructions": "インジケーターが緑のゾーンにあるときにボタンを押してスコアを獲得!",
+      "keyboardHint": "スペースキーまたはエンターキーも使えます"
     }
   },
   "theme": {
