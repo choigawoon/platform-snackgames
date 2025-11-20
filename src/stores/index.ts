@@ -29,9 +29,10 @@ import { createApiSlice, type ApiSlice } from './slices/apiSlice'
 import { createUiSlice, type UiSlice } from './slices/uiSlice'
 import { createTaskSlice, type TaskSlice } from './slices/taskSlice'
 import { createWorkflowSlice, type WorkflowSlice } from './slices/workflowSlice'
+import { createGameSlice, type GameSlice } from './slices/gameSlice'
 
 // Combined store type
-export type Store = ApiSlice & UiSlice & TaskSlice & WorkflowSlice
+export type Store = ApiSlice & UiSlice & TaskSlice & WorkflowSlice & GameSlice
 
 /**
  * Main application store
@@ -47,6 +48,7 @@ export const useStore = create<Store>()(
         ...createUiSlice(...args),
         ...createTaskSlice(...args),
         ...createWorkflowSlice(...args),
+        ...createGameSlice(...args),
       }),
       {
         name: 'app-storage', // LocalStorage key
@@ -55,6 +57,8 @@ export const useStore = create<Store>()(
           theme: state.theme,
           language: state.language,
           isSidebarOpen: state.isSidebarOpen,
+          viewMode: state.viewMode,
+          recentGameIds: state.recentGameIds,
         }),
       }
     ),
@@ -126,6 +130,15 @@ export const useWorkHistory = () => useStore(state => state.workHistory)
 export const useWorkLogs = () => useStore(state => state.workLogs)
 export const useIsWorkInProgress = () => useStore(state => state.isWorkInProgress)
 
+// Game selectors
+export const useViewMode = () => useStore(state => state.viewMode)
+export const useSelectedCategory = () => useStore(state => state.selectedCategory)
+export const useSearchQuery = () => useStore(state => state.searchQuery)
+export const useSortOption = () => useStore(state => state.sortOption)
+export const useCurrentGameId = () => useStore(state => state.currentGameId)
+export const useVisitorId = () => useStore(state => state.visitorId)
+export const useRecentGameIds = () => useStore(state => state.recentGameIds)
+
 /**
  * Action hooks for better organization
  * Group related actions together
@@ -180,6 +193,19 @@ export const useWorkflowActions = () => useStore(
   }))
 )
 
+export const useGameActions = () => useStore(
+  useShallow(state => ({
+    setViewMode: state.setViewMode,
+    setSelectedCategory: state.setSelectedCategory,
+    setSearchQuery: state.setSearchQuery,
+    setSortOption: state.setSortOption,
+    setCurrentGameId: state.setCurrentGameId,
+    addToRecentGames: state.addToRecentGames,
+    clearRecentGames: state.clearRecentGames,
+    resetFilters: state.resetFilters,
+  }))
+)
+
 /**
  * Reset all stores (useful for logout)
  */
@@ -203,3 +229,4 @@ export type { User, Post } from './slices/apiSlice'
 export type { Theme, Language, Notification } from './slices/uiSlice'
 export type { Task } from './slices/taskSlice'
 export type { WorkItem, WorkLog, WorkStatus } from './slices/workflowSlice'
+export type { ViewMode, SortOption } from './slices/gameSlice'

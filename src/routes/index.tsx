@@ -1,67 +1,105 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
-import logo from '../logo.svg'
-import { LanguageSelector } from '@/components/LanguageSelector'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { Gamepad2, TrendingUp, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { GameSection } from '@/components/games/GameGrid'
+import { useGames } from '@/api/services/games'
+import { useRecentGameIds } from '@/stores'
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: HomePage,
 })
 
-function App() {
-  const { t } = useTranslation()
+function HomePage() {
+  const recentGameIds = useRecentGameIds()
+
+  // Fetch popular games
+  const { data: popularData, isLoading: isLoadingPopular } = useGames({
+    sort_by: 'popular',
+    limit: 4,
+  })
+
+  // Fetch latest games
+  const { data: latestData, isLoading: isLoadingLatest } = useGames({
+    sort_by: 'latest',
+    limit: 4,
+  })
+
+  // Fetch top rated games
+  const { data: ratedData, isLoading: isLoadingRated } = useGames({
+    sort_by: 'rating',
+    limit: 4,
+  })
 
   return (
-    <div className="text-center">
-      <header className="min-h-screen flex flex-col items-center justify-center bg-[#282c34] text-white text-[calc(10px+2vmin)]">
-        <img
-          src={logo}
-          className="h-[40vmin] pointer-events-none animate-[spin_20s_linear_infinite]"
-          alt="logo"
-        />
-        <h1 className="text-4xl font-bold mb-4">{t('pages.home.title')}</h1>
-        <p className="mb-4 max-w-md">
-          {t('pages.home.description')}
-        </p>
-
-        {/* i18n Demo Section */}
-        <Card className="mt-8 max-w-lg bg-gray-700/50 border-gray-600">
-          <CardHeader>
-            <CardTitle className="text-xl text-white">{t('language.select')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LanguageSelector variant="buttons" className="justify-center" />
-
-            <div className="mt-6 text-left text-sm space-y-2 text-gray-200">
-              <p><strong>{t('common.loading')}</strong></p>
-              <p><strong>{t('common.save')}</strong> / <strong>{t('common.cancel')}</strong></p>
-              <p><strong>{t('form.name')}:</strong> {t('form.required')}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="mt-8 flex gap-4">
-          <Button variant="link" asChild className="text-[#61dafb]">
-            <a
-              href="https://reactjs.org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn React
-            </a>
-          </Button>
-          <Button variant="link" asChild className="text-[#61dafb]">
-            <a
-              href="https://tanstack.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn TanStack
-            </a>
-          </Button>
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-b from-primary/10 to-background py-12 px-4">
+        <div className="container mx-auto text-center">
+          <div className="flex justify-center mb-4">
+            <Gamepad2 className="w-16 h-16 text-primary" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            SnackGames
+          </h1>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            간단하고 재미있는 미니게임을 즐겨보세요. 언제 어디서나 빠르게 플레이할 수 있는 스낵 같은 게임들!
+          </p>
+          <div className="flex justify-center gap-4">
+            <Link to="/explore">
+              <Button size="lg" className="gap-2">
+                <TrendingUp className="w-5 h-5" />
+                게임 탐색
+              </Button>
+            </Link>
+            <Link to="/swipe">
+              <Button size="lg" variant="outline" className="gap-2">
+                <Gamepad2 className="w-5 h-5" />
+                스와이프 모드
+              </Button>
+            </Link>
+          </div>
         </div>
-      </header>
+      </section>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8 space-y-12">
+        {/* Popular Games */}
+        <GameSection
+          title="인기 게임"
+          games={popularData?.games || []}
+          isLoading={isLoadingPopular}
+          showAll={() => window.location.href = '/explore?sort=popular'}
+        />
+
+        {/* Latest Games */}
+        <GameSection
+          title="최신 게임"
+          games={latestData?.games || []}
+          isLoading={isLoadingLatest}
+          showAll={() => window.location.href = '/explore?sort=latest'}
+        />
+
+        {/* Top Rated Games */}
+        <GameSection
+          title="평점 높은 게임"
+          games={ratedData?.games || []}
+          isLoading={isLoadingRated}
+          showAll={() => window.location.href = '/explore?sort=rating'}
+        />
+
+        {/* Recent Games (if any) */}
+        {recentGameIds.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-muted-foreground" />
+              <h2 className="text-xl font-bold">최근 플레이</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              최근에 플레이한 게임들이 여기에 표시됩니다.
+            </p>
+          </section>
+        )}
+      </main>
     </div>
   )
 }

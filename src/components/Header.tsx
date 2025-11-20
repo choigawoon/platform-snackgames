@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
-import { Home, Menu, Database, Server } from 'lucide-react'
+import { Home, Menu, Compass, Smartphone, Gamepad2 } from 'lucide-react'
 import LanguageSelector from './LanguageSelector'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,81 +12,103 @@ import {
 import { useSidebar, useUiActions } from '@/stores'
 
 export default function Header() {
-  const { t } = useTranslation()
   const isSidebarOpen = useSidebar()
   const { setSidebarOpen } = useUiActions()
 
   return (
-    <header className="p-4 flex items-center justify-between bg-gray-800 text-white shadow-lg">
+    <header className="sticky top-0 z-50 h-16 px-4 flex items-center justify-between bg-background border-b">
       <div className="flex items-center">
         <Sheet open={isSidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-gray-700"
+              className="md:hidden"
               aria-label="Open menu"
             >
               <Menu size={24} />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-80 bg-gray-900 text-white border-gray-700 p-0">
-            <SheetHeader className="p-4 border-b border-gray-700">
-              <SheetTitle className="text-xl font-bold text-white">{t('nav.home')}</SheetTitle>
+          <SheetContent side="left" className="w-80 p-0">
+            <SheetHeader className="p-4 border-b">
+              <SheetTitle className="text-xl font-bold flex items-center gap-2">
+                <Gamepad2 className="w-6 h-6 text-primary" />
+                SnackGames
+              </SheetTitle>
             </SheetHeader>
 
             <nav className="flex-1 p-4 overflow-y-auto">
               <Link
                 to="/"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors mb-2"
                 activeProps={{
                   className:
-                    'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
+                    'flex items-center gap-3 p-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mb-2',
                 }}
+                onClick={() => setSidebarOpen(false)}
               >
                 <Home size={20} />
-                <span className="font-medium">{t('nav.home')}</span>
-              </Link>
-
-              {/* Demo Links Start */}
-              <Link
-                to="/zustand-test"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-                activeProps={{
-                  className:
-                    'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-                }}
-              >
-                <Database size={20} />
-                <span className="font-medium">{t('nav.zustandTest')}</span>
+                <span className="font-medium">홈</span>
               </Link>
 
               <Link
-                to="/msw-test"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+                to="/explore"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors mb-2"
                 activeProps={{
                   className:
-                    'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
+                    'flex items-center gap-3 p-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mb-2',
                 }}
+                onClick={() => setSidebarOpen(false)}
               >
-                <Server size={20} />
-                <span className="font-medium">{t('nav.mswTest')}</span>
+                <Compass size={20} />
+                <span className="font-medium">게임 탐색</span>
               </Link>
-              {/* Demo Links End */}
+
+              <Link
+                to="/swipe"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors mb-2"
+                activeProps={{
+                  className:
+                    'flex items-center gap-3 p-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mb-2',
+                }}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <Smartphone size={20} />
+                <span className="font-medium">스와이프</span>
+              </Link>
             </nav>
           </SheetContent>
         </Sheet>
-        <h1 className="ml-4 text-xl font-semibold">
+
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 ml-2 md:ml-0">
+          <Gamepad2 className="w-7 h-7 text-primary" />
+          <span className="text-xl font-bold hidden sm:inline">SnackGames</span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1 ml-8">
           <Link to="/">
-            <img
-              src="/tanstack-word-logo-white.svg"
-              alt="TanStack Logo"
-              className="h-10"
-            />
+            <Button variant="ghost" size="sm">
+              홈
+            </Button>
           </Link>
-        </h1>
+          <Link to="/explore">
+            <Button variant="ghost" size="sm">
+              게임 탐색
+            </Button>
+          </Link>
+          <Link to="/swipe">
+            <Button variant="ghost" size="sm">
+              스와이프
+            </Button>
+          </Link>
+        </nav>
       </div>
-      <LanguageSelector className="text-gray-800" />
+
+      <div className="flex items-center gap-2">
+        <LanguageSelector />
+      </div>
     </header>
   )
 }
