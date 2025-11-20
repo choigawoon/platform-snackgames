@@ -236,6 +236,18 @@
     "minLength": "Must be at least {{min}} characters",
     "maxLength": "Must be at most {{max}} characters"
   },
+  "games": {
+    "memory": {
+      "moves": "{{count}} moves",
+      "restart": "Restart",
+      "bestScore": "Best: {{moves}} moves",
+      "congratulations": "Congratulations!",
+      "completedIn": "Completed in {{moves}} moves ({{time}})!",
+      "newRecord": "New Record!",
+      "playAgain": "Play Again",
+      "instructions": "Click on cards to find matching pairs!"
+    }
+  },
   "theme": {
     "light": "Light",
     "dark": "Dark",

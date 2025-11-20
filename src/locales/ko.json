@@ -236,6 +236,18 @@
     "minLength": "최소 {{min}}자 이상이어야 합니다",
     "maxLength": "최대 {{max}}자까지 입력 가능합니다"
   },
+  "games": {
+    "memory": {
+      "moves": "{{count}}번",
+      "restart": "다시 시작",
+      "bestScore": "최고 기록: {{moves}}번",
+      "congratulations": "축하합니다!",
+      "completedIn": "{{moves}}번 만에 {{time}}에 완료했습니다!",
+      "newRecord": "새로운 기록입니다!",
+      "playAgain": "다시 플레이",
+      "instructions": "카드를 클릭하여 같은 그림 짝을 찾아보세요!"
+    }
+  },
   "theme": {
     "light": "라이트",
     "dark": "다크",
