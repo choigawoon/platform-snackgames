@@ -23,6 +23,9 @@ export function GameSwiper({
   onGameChange,
 }: GameSwiperProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const touchStartY = useRef(0)
 
@@ -36,34 +39,60 @@ export function GameSwiper({
 
   const goToNext = () => {
     if (currentIndex < games.length - 1) {
+      setIsAnimating(true)
       setCurrentIndex(currentIndex + 1)
+      setTimeout(() => setIsAnimating(false), 300)
     }
   }
 
   const goToPrev = () => {
     if (currentIndex > 0) {
+      setIsAnimating(true)
       setCurrentIndex(currentIndex - 1)
+      setTimeout(() => setIsAnimating(false), 300)
     }
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isAnimating) return
     touchStartY.current = e.touches[0].clientY
+    setIsDragging(true)
   }
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const touchEndY = e.changedTouches[0].clientY
-    const diff = touchStartY.current - touchEndY
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || isAnimating) return
+    const currentY = e.touches[0].clientY
+    const diff = currentY - touchStartY.current
 
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) {
-        goToNext()
-      } else {
-        goToPrev()
-      }
+    // 경계에서 저항감 추가
+    const resistance = 0.3
+    let newOffset = diff
+
+    if ((currentIndex === 0 && diff > 0) ||
+        (currentIndex === games.length - 1 && diff < 0)) {
+      newOffset = diff * resistance
     }
+
+    setDragOffset(newOffset)
+  }
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const threshold = 80
+
+    if (dragOffset < -threshold && currentIndex < games.length - 1) {
+      goToNext()
+    } else if (dragOffset > threshold && currentIndex > 0) {
+      goToPrev()
+    }
+
+    setDragOffset(0)
   }
 
   const handleWheel = (e: React.WheelEvent) => {
+    if (isAnimating) return
     if (e.deltaY > 0) {
       goToNext()
     } else {
@@ -97,20 +126,21 @@ export function GameSwiper({
     )
   }
 
-  return (
+  // 게임 슬라이드 렌더링 함수
+  const renderGameSlide = (game: GameResponse, index: number) => (
     <div
-      ref={containerRef}
-      className="relative h-[calc(100vh-4rem)] w-full bg-black overflow-hidden"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onWheel={handleWheel}
+      key={game.id}
+      className="absolute inset-0 w-full h-full"
+      style={{
+        transform: `translateY(${(index - currentIndex) * 100}%)`,
+      }}
     >
       {/* Game Content */}
       <div className="absolute inset-0 flex items-center justify-center">
-        {currentGame.thumbnail ? (
+        {game.thumbnail ? (
           <img
-            src={currentGame.thumbnail}
-            alt={currentGame.title}
+            src={game.thumbnail}
+            alt={game.title}
             className="w-full h-full object-contain"
           />
         ) : (
@@ -126,28 +156,49 @@ export function GameSwiper({
       {/* Game Info */}
       <div className="absolute bottom-0 left-0 right-16 p-4 text-white">
         <Badge variant="secondary" className="mb-2">
-          {categoryLabels[currentGame.category] || currentGame.category}
+          {categoryLabels[game.category] || game.category}
         </Badge>
-        <h2 className="text-xl font-bold mb-2">{currentGame.title}</h2>
+        <h2 className="text-xl font-bold mb-2">{game.title}</h2>
         <p className="text-sm text-white/80 line-clamp-2 mb-3">
-          {currentGame.description}
+          {game.description}
         </p>
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span>{currentGame.avg_rating.toFixed(1)}</span>
+            <span>{game.avg_rating.toFixed(1)}</span>
           </div>
           <div className="flex items-center gap-1">
             <Play className="w-4 h-4" />
-            <span>{currentGame.play_count.toLocaleString()}</span>
+            <span>{game.play_count.toLocaleString()}</span>
           </div>
         </div>
-        <Link to="/games/$gameId" params={{ gameId: String(currentGame.id) }}>
+        <Link to="/games/$gameId" params={{ gameId: String(game.id) }}>
           <Button className="mt-4 gap-2">
             <Play className="w-4 h-4" />
             게임 플레이
           </Button>
         </Link>
+      </div>
+    </div>
+  )
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative h-[calc(100vh-4rem)] w-full bg-black overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onWheel={handleWheel}
+    >
+      {/* Slides Container */}
+      <div
+        className={`relative w-full h-full ${!isDragging ? 'transition-transform duration-300 ease-out' : ''}`}
+        style={{
+          transform: `translateY(${dragOffset}px)`,
+        }}
+      >
+        {games.map((game, index) => renderGameSlide(game, index))}
       </div>
 
       {/* Side Actions */}
