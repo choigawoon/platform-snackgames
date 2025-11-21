@@ -246,6 +246,24 @@
       "newRecord": "새로운 기록입니다!",
       "playAgain": "다시 플레이",
       "instructions": "카드를 클릭하여 같은 그림 짝을 찾아보세요!"
+    },
+    "timing": {
+      "score": "점수: {{score}}",
+      "combo": "콤보: {{combo}}x",
+      "restart": "다시 시작",
+      "bestScore": "최고 기록: {{score}}점",
+      "pressToStart": "눌러서 시작!",
+      "hit": "누르세요!",
+      "gameOver": "게임 오버",
+      "finalScore": "최종 점수: {{score}}점",
+      "maxCombo": "최대 콤보: {{combo}}x",
+      "newRecord": "새로운 기록입니다!",
+      "playAgain": "다시 플레이",
+      "perfect": "Perfect!",
+      "good": "Good!",
+      "miss": "Miss!",
+      "instructions": "인디케이터가 초록색 영역에 있을 때 버튼을 눌러 점수를 획득하세요!",
+      "keyboardHint": "스페이스바 또는 엔터 키를 사용할 수도 있습니다"
     }
   },
   "theme": {

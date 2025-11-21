@@ -246,6 +246,24 @@
       "newRecord": "New Record!",
       "playAgain": "Play Again",
       "instructions": "Click on cards to find matching pairs!"
+    },
+    "timing": {
+      "score": "Score: {{score}}",
+      "combo": "Combo: {{combo}}x",
+      "restart": "Restart",
+      "bestScore": "Best: {{score}} pts",
+      "pressToStart": "Press to Start!",
+      "hit": "HIT!",
+      "gameOver": "Game Over",
+      "finalScore": "Final Score: {{score}}",
+      "maxCombo": "Max Combo: {{combo}}x",
+      "newRecord": "New Record!",
+      "playAgain": "Play Again",
+      "perfect": "Perfect!",
+      "good": "Good!",
+      "miss": "Miss!",
+      "instructions": "Press the button when the indicator is in the green zone to score!",
+      "keyboardHint": "You can also use Space or Enter key"
     }
   },
   "theme": {
