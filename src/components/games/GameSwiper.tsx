@@ -133,6 +133,7 @@ export function GameSwiper({
       className="absolute inset-0 w-full h-full"
       style={{
         transform: `translateY(${(index - currentIndex) * 100}%)`,
+        transition: !isDragging ? 'transform 300ms ease-out' : 'none',
       }}
     >
       {/* Game Content */}
