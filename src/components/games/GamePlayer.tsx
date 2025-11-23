@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { MemoryGame } from './MemoryGame'
 import { TimingButtonGame } from './TimingButtonGame'
+import { PixelColoringGame } from './PixelColoringGame'
 
 interface GamePlayerProps {
   url: string
@@ -22,6 +23,7 @@ interface GamePlayerProps {
 const INTERNAL_GAMES: Record<string, React.ComponentType<{ onPlay?: () => void }>> = {
   'memory-game': MemoryGame,
   'timing-button-game': TimingButtonGame,
+  'pixel-coloring-game': PixelColoringGame,
 }
 
 export function GamePlayer({ url, title, embedAllowed, onPlay }: GamePlayerProps) {
