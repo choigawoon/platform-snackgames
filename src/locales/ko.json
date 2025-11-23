@@ -264,6 +264,25 @@
       "miss": "Miss!",
       "instructions": "인디케이터가 초록색 영역에 있을 때 버튼을 눌러 점수를 획득하세요!",
       "keyboardHint": "스페이스바 또는 엔터 키를 사용할 수도 있습니다"
+    },
+    "pixelColoring": {
+      "selectTemplate": "템플릿 선택",
+      "selectColor": "색상 선택",
+      "brush": "브러시",
+      "eraser": "지우개",
+      "grid": "격자",
+      "reset": "초기화",
+      "download": "다운로드",
+      "uploadImage": "이미지 업로드",
+      "currentColor": "현재 색상",
+      "instructions": "템플릿을 선택하거나 이미지를 업로드해서 픽셀 아트를 색칠해보세요!",
+      "templates": {
+        "rabbit": "토끼",
+        "apple": "사과",
+        "mushroom": "버섯",
+        "star": "별",
+        "heart": "하트"
+      }
     }
   },
   "theme": {

@@ -264,6 +264,25 @@
       "miss": "Miss!",
       "instructions": "インジケーターが緑のゾーンにあるときにボタンを押してスコアを獲得!",
       "keyboardHint": "スペースキーまたはエンターキーも使えます"
+    },
+    "pixelColoring": {
+      "selectTemplate": "テンプレート選択",
+      "selectColor": "色を選択",
+      "brush": "ブラシ",
+      "eraser": "消しゴム",
+      "grid": "グリッド",
+      "reset": "リセット",
+      "download": "ダウンロード",
+      "uploadImage": "画像アップロード",
+      "currentColor": "現在の色",
+      "instructions": "テンプレートを選択するか画像をアップロードしてピクセルアートを塗ってみよう!",
+      "templates": {
+        "rabbit": "うさぎ",
+        "apple": "りんご",
+        "mushroom": "きのこ",
+        "star": "星",
+        "heart": "ハート"
+      }
     }
   },
   "theme": {

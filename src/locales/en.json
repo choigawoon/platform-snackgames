@@ -264,6 +264,25 @@
       "miss": "Miss!",
       "instructions": "Press the button when the indicator is in the green zone to score!",
       "keyboardHint": "You can also use Space or Enter key"
+    },
+    "pixelColoring": {
+      "selectTemplate": "Select Template",
+      "selectColor": "Select Color",
+      "brush": "Brush",
+      "eraser": "Eraser",
+      "grid": "Grid",
+      "reset": "Reset",
+      "download": "Download",
+      "uploadImage": "Upload Image",
+      "currentColor": "Current Color",
+      "instructions": "Select a template or upload an image to start coloring pixel art!",
+      "templates": {
+        "rabbit": "Rabbit",
+        "apple": "Apple",
+        "mushroom": "Mushroom",
+        "star": "Star",
+        "heart": "Heart"
+      }
     }
   },
   "theme": {
